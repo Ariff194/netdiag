@@ -4,6 +4,7 @@ from enum import Enum
 
 class Status(Enum):
     OK = "OK"
+    WARN = "WARN"
     FAIL = "FAIL"
     SKIP = "SKIP"
 
