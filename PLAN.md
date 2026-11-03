@@ -14,12 +14,12 @@ Out of scope: port scanning, GUI
 
 ## Estimate
 ~16h MVP. Stop-and-review point: 24h.
-Used so far: ~2h (after M2)
+Used so far: ~3h (after M3)
 
 ## Milestones
 - [x] M1 Setup + CheckResult (2026-10-31)
 - [x] M2 TCP + HTTP (2026-11-01)
-- [ ] M3 DNS from scratch
+- [x] M3 DNS from scratch (2026-11-03)
 - [ ] M4 Interface/gateway/ping
 - [ ] M5 Diagnose ladder + hints
 - [ ] M6 Tests, README, write-up
@@ -27,7 +27,7 @@ Used so far: ~2h (after M2)
 ## Definition of done
 - [ ] Interface check works
 - [ ] Ping check works
-- [ ] DNS check works (my own packet builder/parser)
+- [x] DNS check works (my own packet builder/parser)
 - [x] TCP check works (refused / timeout / unreachable / DNS failure)
 - [x] HTTP check works (OK / WARN / SKIP / TLS error)
 - [ ] `netdiag diagnose <host>` runs the checks in order and stops at the first failing layer
@@ -43,6 +43,11 @@ Used so far: ~2h (after M2)
 - 2026-10-31: Repo private until MVP works, then public.
 - 2026-10-31: Every check returns a shared CheckResult so the CLI/reporter stays independent of check logic.
 - (planned, M4) Use subprocess ping instead of raw ICMP — raw sockets need root.
+
 - 2026-11-01: Added Status.WARN for HTTP 4xx/5xx — network path worked, server answered with an error, which is a different problem from a failed connection.
 - 2026-11-01: `netdiag http` checks TCP first and marks HTTP as SKIP if TCP fails, so output shows which layer broke. Trade-off: two connections instead of one.
 - 2026-11-01: HTTP check does not follow redirects; a 3xx is reported as-is because the redirect itself is diagnostic information.
+
+- 2026-11-03: DNS check queries the first nameserver in /etc/resolv.conf by default, with a --server override, so it tests what the machine actually uses.
+- 2026-11-03: NOERROR with no A record is WARN, not FAIL: DNS worked, but the name has no IPv4 address (same reasoning as the HTTP WARN decision).
+- 2026-11-03: MVP queries A records only over UDP; no AAAA and no TCP fallback for truncated replies (reported as WARN).
