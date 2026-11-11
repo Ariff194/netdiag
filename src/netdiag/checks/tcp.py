@@ -22,7 +22,7 @@ def check_tcp(host: str, port: int, timeout: float = 3.0) -> CheckResult:
 
 def _classify(e: OSError, target: str, timeout: float) -> tuple[str, str | None]:
     # Order matters: these are all subclasses of OSError, so check specific ones first.
-    if isinstance(e, socket.gaierror):
+    if isinstance(e, socket.gaierror): #getaddrinfo error
         return (f"cannot resolve host in {target}",
                 "DNS lookup failed. Check the spelling, then try: dig <host>")
     if isinstance(e, ConnectionRefusedError):

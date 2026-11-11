@@ -1,8 +1,11 @@
 import argparse
 
 from netdiag.checks.dns import check_dns
+from netdiag.checks.gateway import check_gateway
 from netdiag.checks.http import check_http, parse_url
+from netdiag.checks.interface import check_interface
 from netdiag.checks.localhost import check_localhost
+from netdiag.checks.ping import check_ping
 from netdiag.checks.tcp import check_tcp
 from netdiag.models import CheckResult, Status
 
@@ -19,7 +22,19 @@ def main() -> None:
                                      description="Diagnose network problems layer by layer.")
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("selftest", help="Check that netdiag itself works")
-    
+
+    sub.add_parser("interface", help="Check that a network interface is up with an IPv4 address")
+
+    gw_p = sub.add_parser("gateway", help="Find the default gateway and ping it")
+    gw_p.add_argument("--timeout", type=float, default=2.0,
+                      help="seconds to wait for each reply")
+
+    ping_p = sub.add_parser("ping", help="Ping HOST using the system ping command")
+    ping_p.add_argument("host")
+    ping_p.add_argument("--count", type=int, default=3)
+    ping_p.add_argument("--timeout", type=float, default=2.0,
+                        help="seconds to wait for each reply")
+
     tcp_p = sub.add_parser("tcp", help="Test a TCP connection to HOST PORT")
     tcp_p.add_argument("host")
     tcp_p.add_argument("port", type=int)
@@ -39,6 +54,14 @@ def main() -> None:
 
     if args.command == "selftest":
         print_result(check_localhost())
+    elif args.command == "interface":
+        print_result(check_interface())
+    elif args.command == "gateway":
+        print_result(check_gateway(args.timeout))
+    elif args.command == "ping":
+        if args.count < 1:
+            parser.error("--count must be at least 1")
+        print_result(check_ping(args.host, args.count, args.timeout))
     elif args.command == "tcp":
         print_result(check_tcp(args.host, args.port, args.timeout))
     elif args.command == "http":
